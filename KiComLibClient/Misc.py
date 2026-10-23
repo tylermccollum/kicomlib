@@ -10,6 +10,9 @@ from .sexpdata import Symbol
 ######################################################################################
 
 
+# subprocess.run() rejects creationflags on non-Windows platforms (CREATE_NO_WINDOW = 0x08000000).
+NO_WINDOW_KWARGS = {"creationflags": 0x08000000} if sys.platform == "win32" else {}
+
 _kicad_cli_path = None
 
 def getKiCadCliPath():

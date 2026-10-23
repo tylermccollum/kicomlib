@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from collections import Counter
 
-from .Misc import ActionType, ReturnCode, RemoteChange, getSymbolValue, getKiCadCliPath
+from .Misc import ActionType, ReturnCode, RemoteChange, getSymbolValue, getKiCadCliPath, NO_WINDOW_KWARGS
 from .ChangeReview import resolve_action
 from .RestAPI import RestAPI
 from .Canonical import canonicalSymbolText, sha256Text, sha256Bytes
@@ -534,9 +534,8 @@ class SyncSymbols:
                 getKiCadCliPath(), "sym", "export", "svg",
                 "--output", tmp_dir_name, "--symbol", symbol_name, preview_library.as_posix(),
             ]
-            CREATE_NO_WINDOW = 0x08000000
             try:
-                result = subprocess.run(cmd, capture_output=True, text=True, creationflags=CREATE_NO_WINDOW)
+                result = subprocess.run(cmd, capture_output=True, text=True, **NO_WINDOW_KWARGS)
             except OSError as e:
                 print("Error running kicad-cli for preview image of symbol '", symbol_name, "':", e, file=sys.stderr)
                 return file_data
