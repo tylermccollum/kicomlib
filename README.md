@@ -50,6 +50,18 @@ Same as above, but instead cloning the main branch, clone the desired tag:
 git clone --depth 1 --branch v2.0.1 https://github.com/heronitec-solutions/kicomlib
 ```
 
+## Embedded 3D models
+
+Footprint references using `kicad-embed://` keep their original URI, embedded
+payload, and placement during synchronization. Embedded models need no separate
+server model record. External model paths still use the configured model
+directory; footprints with both kinds retain their original model positions.
+
+If an older client uploaded an embedded reference as
+`${PLACEHOLDER}/kicad-embed:/...`, update the client and sync the correct local
+footprint again. This creates a corrected revision without rewriting history.
+The client does not automatically repair already-damaged server copies.
+
 ## Known Problems
 
 ### Plugin icon position

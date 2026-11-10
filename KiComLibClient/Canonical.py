@@ -50,8 +50,14 @@ def splitModelPath(path):
     return '', cleaned
 
 
+def _isEmbeddedModelPath(path):
+    return isinstance(path, str) and path.startswith('kicad-embed://')
+
+
 def normalizeModelPathForCanonical(path):
-    """Normalise a model path to ${PLACEHOLDER}/<dir>/<file> or ${PLACEHOLDER}/<file>."""
+    """Preserve embedded references; normalise external paths to ${PLACEHOLDER}/..."""
+    if _isEmbeddedModelPath(path):
+        return path
     directory, filename = splitModelPath(path)
     if not filename:
         return PLACEHOLDER + '/'
@@ -69,8 +75,8 @@ def _setModelPathString(model_block, new_path):
 
 def canonicalFootprintText(parsed):
     """
-    Canonical footprint text: pretty-printed S-expression with every
-    (model \"...\") path normalised to ${PLACEHOLDER}/...
+    Canonical footprint text: pretty-printed S-expression with external
+    (model \"...\") paths normalised to ${PLACEHOLDER}/... and embedded URIs preserved.
     """
     # Work on a deep-ish copy via re-parse so we don't mutate caller's tree
     text0 = dumps(parsed, pretty_print=True)
@@ -108,7 +114,9 @@ def _xyzFromList(block, default):
 
 def extractModels(parsed):
     """
-    Read ALL (model ...) blocks with offset/scale/rotate/opacity/hide.
+    Read external (model ...) blocks with offset/scale/rotate/opacity/hide.
+    Embedded models stay in the footprint blob and need no separate model record.
+    Positions refer to the original source order, including embedded entries.
     Returns list of dict(position, directory, filename, offset, scale, rotate, opacity, hide).
     """
     models = []
@@ -116,6 +124,8 @@ def extractModels(parsed):
         if not isinstance(model, list) or len(model) < 2:
             continue
         path = model[1] if isinstance(model[1], str) else ''
+        if _isEmbeddedModelPath(path):
+            continue
         directory, filename = splitModelPath(path)
 
         offset = [0.0, 0.0, 0.0]

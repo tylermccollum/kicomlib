@@ -488,7 +488,7 @@ class SyncFootprints:
         canonical = canonicalFootprintText(parsed_data)
         blob_hash = sha256Text(canonical)
 
-        # ALL models
+        # External model associations only; embedded models stay in the footprint blob.
         extracted = extractModels(parsed_data)
         models_payload = []
         for m in extracted:
